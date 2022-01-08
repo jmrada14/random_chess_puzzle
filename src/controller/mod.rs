@@ -1,19 +1,4 @@
 use actix_web::{web, HttpResponse, Responder};
-use serde::Deserialize;
-
-#[derive(Deserialize)]
-pub struct Puzzle {
-    _id: ObjectId,
-    puzzle_id: String,
-    fen: String,
-    moves: String,
-    rating: i32,
-    rating_deviation: i32,
-    popularity: i32,
-    nb_plays: i32,
-    theme: String,
-    game_url: String,
-}
 
 pub async fn get(
     app_data: web::Data<crate::AppState>,

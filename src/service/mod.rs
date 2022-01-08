@@ -3,11 +3,11 @@ use mongodb::{error::Error, Collection};
 
 #[derive(Clone)]
 pub struct PuzzleService {
-    collection: Collection,
+    collection: Collection<T>,
 }
 
 impl PuzzleService {
-    pub fn new(collection: Collection) -> PuzzleService {
+    pub fn new(collection: Collection<T>) -> PuzzleService {
         PuzzleService { collection }
     }
 
