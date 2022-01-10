@@ -5,5 +5,9 @@ All puzzles come from [Lichess Puzzle Database](https://database.lichess.org/#pu
 There are currently ~2 million puzzles in the database.
 
 ## Tools: 
+- Actix-web
+- mongodb
+- serde
+
 
 
