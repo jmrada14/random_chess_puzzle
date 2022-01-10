@@ -1,9 +1,25 @@
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use serde_json::json;
 use service::PuzzleService;
-use mongodb::results::Resu
+use std::env;
 
+mod controller;
 mod service;
+
+// service container
+pub struct ServiceContainer {
+    puzzle: PuzzleService,
+}
+
+impl ServiceContainer {
+    pub fn new(puzzle: PuzzleService) -> Self {
+        ServiceContainer { puzzle }
+    }
+}
+
+pub struct AppState {
+    service_container: ServiceContainer,
+}
 
 //Root handler
 async fn welcome() -> impl Responder {
@@ -17,12 +33,24 @@ async fn welcome() -> impl Responder {
     ))
 }
 
-
 // Server
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().route("/", web::get().to(welcome)))
-        .bind("127.0.0.1:8080")?
-        .run()
-        .await
+    let client = mongodb::Client::with_uri_str(env::var("CHESS_MONGODB_URI").unwrap()).await;
+    let db = client?.database("chess-puzzles");
+    let collection = db.collection("puzzles");
+
+    HttpServer::new(move || {
+        let service_container = ServiceContainer::new(PuzzleService::new(collection.clone()));
+        App::new()
+            .data(AppState { service_container })
+            .route("/", web::get().to(welcome))
+            .route(
+                "/api/v1/get-puzzle",
+                web::get().to(controller::get_puzzle),
+            )
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
 }
