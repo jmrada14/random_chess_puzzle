@@ -37,20 +37,24 @@ async fn welcome() -> impl Responder {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let client = mongodb::Client::with_uri_str(env::var("CHESS_MONGODB_URI").unwrap()).await;
-    let db = client?.database("chess-puzzles");
-    let collection = db.collection("puzzles");
+    match client {
+        Ok(client) => {
+            let db = client.database("chess-puzzles");
+            let collection = db.collection("puzzles");
 
-    HttpServer::new(move || {
-        let service_container = ServiceContainer::new(PuzzleService::new(collection.clone()));
-        App::new()
-            .data(AppState { service_container })
-            .route("/", web::get().to(welcome))
-            .route(
-                "/api/v1/get-puzzle",
-                web::get().to(controller::get_puzzle),
-            )
-    })
-    .bind("127.0.0.1:8080")?
-    .run()
-    .await
+            HttpServer::new(move || {
+                let service_container =
+                    ServiceContainer::new(PuzzleService::new(collection.clone()));
+                App::new()
+                    .data(AppState { service_container })
+                    .route("/", web::get().to(welcome))
+                    .route("/api/v1/get-puzzle", web::get().to(controller::get_puzzle))
+            })
+            .bind("127.0.0.1:8080")?
+            .run()
+            .await
+        }
+        // Convert mongodb::error::Error into std::io::Error
+        Err(e) => Err(std::io::Error::new(std::io::ErrorKind::Other, e)),
+    }
 }
