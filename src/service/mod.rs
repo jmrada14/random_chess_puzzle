@@ -1,4 +1,4 @@
-use mongodb::bson::{doc};
+use mongodb::bson::doc;
 use mongodb::Collection;
 use serde::Deserialize;
 use serde::Serialize;
@@ -26,7 +26,7 @@ impl PuzzleService {
         PuzzleService { collection }
     }
     // get a single puzzle from the collection
-    pub async fn get_puzzle(&self) -> Result<std::option::Option<Puzzle>, mongodb::error::Error> {
+    pub async fn get_puzzle(&self) -> Result<Option<Puzzle>, mongodb::error::Error> {
         self.collection.find_one(doc! {}, None).await
     }
 }
